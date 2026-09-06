@@ -1,0 +1,89 @@
+{
+ "name": "khatabook-ai-monorepo",
+ "version": "1.0.0",
+ "private": true,
+ "description": "Khatabook AI — AI-Powered Financial Operating System for Indian Freelancers & SMBs",
+ "workspaces": [
+ "frontend",
+ "backend",
+ "shared"
+ ],
+ "scripts": {
+ "dev": "concurrently -n frontend,backend -c blue,green \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+ "dev:frontend": "npm run dev -w frontend",
+ "dev:backend": "npm run dev -w backend",
+ "build": "npm run build -w shared && npm run build -w backend && npm run build -w frontend",
+ "build:frontend": "npm run build -w frontend",
+ "build:backend": "npm run build -w backend",
+ "build:shared": "npm run build -w shared",
+ "install:all": "npm install --workspaces --include-workspace-root",
+ "clean": "rimraf node_modules frontend/node_modules backend/node_modules shared/node_modules frontend/.next frontend/out backend/dist",
+ "lint": "npm run lint --workspaces --if-present",
+ "lint:frontend": "npm run lint -w frontend",
+ "lint:backend": "npm run lint -w backend",
+ "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+ "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
+ "typecheck": "npm run typecheck --workspaces --if-present",
+ "typecheck:frontend": "npm run typecheck -w frontend",
+ "typecheck:backend": "npm run typecheck -w backend",
+ "typecheck:shared": "npm run typecheck -w shared",
+ "test": "npm run test --workspaces --if-present",
+ "test:unit": "npm run test -w backend -- --testPathPattern=unit",
+ "test:integration": "npm run test -w backend -- --testPathPattern=integration",
+ "test:e2e": "npm run test:e2e -w frontend",
+ "test:coverage": "npm run test --workspaces --if-present -- --coverage",
+ "db:generate": "npm run db:generate -w shared",
+ "db:migrate": "npm run db:migrate -w backend",
+ "db:seed": "npm run db:seed -w backend",
+ "db:reset": "npm run db:reset -w backend",
+ "docker:up": "docker compose -f backend/docker-compose.yml up -d",
+ "docker:down": "docker compose -f backend/docker-compose.yml down",
+ "docker:logs": "docker compose -f backend/docker-compose.yml logs -f",
+ "docker:rebuild": "docker compose -f backend/docker-compose.yml up -d --build",
+ "worker:receipt": "npm run worker:receipt -w backend",
+ "worker:pdf": "npm run worker:pdf -w backend",
+ "worker:email": "npm run worker:email -w backend",
+ "queue:ui": "npm run queue:ui -w backend",
+ "prepare": "husky install || true"
+ },
+ "engines": {
+ "node": ">=20.0.0",
+ "npm": ">=10.0.0"
+ },
+ "devDependencies": {
+ "@types/node": "^20.11.0",
+ "concurrently": "^8.2.2",
+ "husky": "^9.0.11",
+ "lint-staged": "^15.2.2",
+ "prettier": "^3.2.5",
+ "rimraf": "^5.0.5",
+ "typescript": "^5.4.0"
+ },
+ "lint-staged": {
+ "*.{ts,tsx,js,jsx}": [
+ "prettier --write"
+ ],
+ "*.{json,md,yml,yaml}": [
+ "prettier --write"
+ ]
+ },
+ "keywords": [
+ "khatabook",
+ "ai",
+ "accounting",
+ "gst",
+ "invoicing",
+ "receipt-scanner",
+ "ocr",
+ "freelance",
+ "smb",
+ "india",
+ "monorepo"
+ ],
+ "author": "Soumya Chakraborty <soumya@khatabook.ai>",
+ "license": "UNLICENSED",
+ "repository": {
+ "type": "git",
+ "url": "https://github.com/your-org/Khatabook-AI.git"
+ }
+}

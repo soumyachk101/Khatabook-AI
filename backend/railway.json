@@ -1,0 +1,31 @@
+{
+ "$schema": "https://railway.app/railway.schema.json",
+ "build": {
+ "builder": "DOCKERFILE",
+ "dockerfilePath": "./Dockerfile",
+ "watchPatterns": [
+ "src/**/*.ts",
+ "package.json"
+ ]
+ },
+ "deploy": {
+ "restartPolicyType": "ON_FAILURE",
+ "restartPolicyMaxRetries": 5,
+ "healthcheckPath": "/api/health",
+ "healthcheckTimeout": 30,
+ "numReplicas": 1,
+ "sleepApplication": false,
+ "multiRegionConfig": {
+ "bom1": {
+ "numReplicas": 1,
+ "weight": 100
+ }
+ }
+ },
+ "env": {
+ "NODE_ENV": "production",
+ "PORT": "3001",
+ "LOG_LEVEL": "info",
+ "TZ": "Asia/Kolkata"
+ }
+}

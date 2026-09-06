@@ -1,0 +1,97 @@
+# =============================================================================
+# Khatabook AI — Root .gitignore
+# =============================================================================
+
+# Dependencies (all workspaces)
+node_modules/
+.pnp
+.pnp.js
+.pnp.cjs
+
+# Build outputs
+**/dist/
+**/build/
+**/out/
+
+# Next.js
+**/.next/
+**/next-env.d.ts
+
+# TypeScript
+**/*.tsbuildinfo
+**/.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS / System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Vercel
+.vercel/
+
+# Testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Turborepo / Monorepo
+.turbo/
+
+# Husky
+.husky/_
+
+# CI
+.github/secrets/
+
+# Supabase (local)
+.supabase/
+
+# Misc
+*.pem
+*.key
+*.crt
+.cache/
+.eslintcache
+.temp/
+tmp/
+temp/
+
+# Package manager files (committed, but ignore generated lock files at root)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

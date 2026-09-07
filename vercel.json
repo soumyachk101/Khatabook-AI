@@ -1,0 +1,146 @@
+{
+ "$schema": "https://openapi.vercel.sh/vercel.json",
+ "version": 2,
+ "framework": "nextjs",
+ "regions": ["iad1"],
+
+ "build": {
+ "env": {
+ "NEXT_PUBLIC_API_URL": "@next_public_api_url",
+ "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+ "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+ "NEXT_PUBLIC_APP_ENV": "@next_public_app_env",
+ "NEXT_PUBLIC_RAZORPAY_KEY_ID": "@next_public_razorpay_key_id"
+ }
+ },
+
+ "functions": {
+ "src/app/api/**/*.ts": {
+ "memory": 1024,
+ "maxDuration": 30
+ },
+ "src/app/api/ocr/upload/route.ts": {
+ "memory": 2048,
+ "maxDuration": 60
+ },
+ "src/app/api/ocr/scan/route.ts": {
+ "memory": 2048,
+ "maxDuration": 120
+ },
+ "src/app/api/ai/**/*.ts": {
+ "memory": 1024,
+ "maxDuration": 60
+ }
+ },
+
+ "headers": [
+ {
+ "source": "/(.*)",
+ "headers": [
+ { "key": "X-Frame-Options", "value": "DENY" },
+ { "key": "X-Content-Type-Options", "value": "nosniff" },
+ { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+ { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+ ]
+ },
+ {
+ "source": "/api/(.*)",
+ "headers": [
+ { "key": "Access-Control-Allow-Origin", "value": "https://khatabook.ai" },
+ { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
+ { "key": "Access-Control-Allow-Headers", "value": "Content-Type,Authorization" },
+ { "key": "Access-Control-Max-Age", "value": "86400" }
+ ]
+ },
+ {
+ "source": "/(.*).js$",
+ "headers": [
+ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+ ]
+ },
+ {
+ "source": "/_next/static/css/(.*).css$",
+ "headers": [
+ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+ ]
+ },
+ {
+ "source": "/(.*)",
+ "headers": [
+ { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+ ]
+ }
+ ],
+
+ "rewrites": [
+ {
+ "source": "/api/v1/:path*",
+ "destination": "https://api.khatabook.ai/v1/:path*"
+ },
+ {
+ "source": "/api/webhooks/razorpay",
+ "destination": "/api/webhooks/razorpay/index"
+ },
+ {
+ "source": "/api/webhooks/twilio",
+ "destination": "/api/webhooks/twilio/index"
+ },
+ {
+ "source": "/api/webhooks/supabase",
+ "destination": "/api/webhooks/supabase/index"
+ },
+ {
+ "source": "/api/webhooks/openai",
+ "destination": "/api/webhooks/openai/index"
+ },
+ {
+ "source": "/manifest.json",
+ "destination": "/api/manifest"
+ },
+ {
+ "source": "/sw.js",
+ "destination": "/api/sw"
+ },
+ {
+ "source": "/offline",
+ "destination": "/index.html"
+ }
+ ],
+
+ "redirects": [
+ {
+ "source": "/api/:path+",
+ "destination": "https://api.khatabook.ai/:path+",
+ "permanent": true
+ },
+ {
+ "source": "/docs/:path*",
+ "destination": "https://docs.khatabook.ai/:path*",
+ "permanent": false
+ }
+ ],
+
+ "cleanUrls": true,
+ "trailingSlash": false,
+
+ "env": {
+ "NEXT_PUBLIC_API_URL": "https://api.khatabook.ai",
+ "NEXT_PUBLIC_APP_ENV": "production",
+ "NEXT_PUBLIC_RAZORPAY_KEY_ID": "@razorpay_key_id"
+ },
+
+ "crons": [
+ {
+ "path": "/api/cron/daily-report",
+ "schedule": "0 8 * * *"
+ },
+ {
+ "path": "/api/cron/invoice-reminder",
+ "schedule": "0 9 * * *"
+ },
+ {
+ "path": "/api/cron/cleanup-temp",
+ "schedule": "0 2 * * *"
+ }
+ ]
+}

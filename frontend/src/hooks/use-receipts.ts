@@ -1,100 +1,84 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+"use client";
 
-export interface Receipt {
- id: string
- vendor: string
- amount: number
- date: string
- category: string
- paymentMode: string
- items?: { name: string; qty: number; price: number }[]
- notes?: string
- cgst?: number
- sgst?: number
- createdAt: string
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+ get,
+ post,
+ put,
+ del,
+ postFormData,
+} from "@/lib/api";
+import type { Receipt, ReceiptItem } from "@/lib/types";
+import { receiptSchema } from "@/lib/validators/schemas";
+
+async function mockFetchReceipts(): Promise<Receipt[]> {
+ await new Promise((r) => setTimeout(r, 600));
+ return [
+ {
+ id: "r1",
+ userId: "u1",
+ imageUrl: "",
+ vendor: "Reliance Fresh",
+ date: "2025-09-04",
+ amount: 2450.75,
+ items: [{ name: "Groceries", quantity: 1, price: 2450.75 }],
+ category: "Supplies",
+ confidence: 0.92,
+ createdAt: "2025-09-04T10:30:00Z",
+ },
+ {
+ id: "r2",
+ userId: "u1",
+ imageUrl: "",
+ vendor: "Indian Oil",
+ date: "2025-09-02",
+ amount: 3200.0,
+ items: [{ name: "Fuel", quantity: 1, price: 3200 }],
+ category: "Transport",
+ confidence: 0.88,
+ createdAt: "2025-09-02T08:15:00Z",
+ },
+ {
+ id: "r3",
+ userId: "u1",
+ imageUrl: "",
+ vendor: "Mahanagar Gas",
+ date: "2025-08-30",
+ amount: 890.5,
+ items: [{ name: "Gas Bill", quantity: 1, price: 890.5 }],
+ category: "Utilities",
+ confidence: 0.95,
+ createdAt: "2025-08-30T14:00:00Z",
+ },
+ ];
 }
 
-const mockReceipts: Receipt[] = [
- {
- id: '1',
- vendor: 'BigBasket',
- amount: 2450,
- date: '2026-09-06',
- category: 'Groceries',
- paymentMode: 'UPI',
- items: [
- { name: 'Milk 2L', qty: 1, price: 60 },
- { name: 'Bread', qty: 1, price: 40 },
- { name: 'Eggs (12)', qty: 1, price: 90 },
- ],
- notes: 'Monthly groceries',
- cgst: 78,
- sgst: 78,
- createdAt: '2026-09-06T10:30:00Z',
- },
- {
- id: '2',
- vendor: 'Shell Station',
- amount: 800,
- date: '2026-09-05',
- category: 'Travel & Transport',
- paymentMode: 'Cash',
- notes: 'Petrol refill',
- createdAt: '2026-09-05T08:15:00Z',
- },
- {
- id: '3',
- vendor: 'Airtel Xtreme',
- amount: 1200,
- date: '2026-09-01',
- category: 'Utilities',
- paymentMode: 'Card',
- notes: 'Internet bill',
- createdAt: '2026-09-01T00:00:00Z',
- },
-]
-
-const delay = (ms: number) => new Promise(r => setTimeout(r, ms))
+async function mockScanReceipt(
+ data: { imageUrl: string }
+): Promise<{ receipt: Receipt; confidence: number }> {
+ await new Promise((r) => setTimeout(r, 1500));
+ const parsed = receiptSchema.parse({
+ vendor: data.imageUrl ? "Detected Vendor" : "Unknown Vendor",
+ date: new Date().toISOString().split("T")[0],
+ amount: Math.round(Math.random() * 5000 + 500),
+ items: [],
+ });
+ return { receipt: parsed as unknown as Receipt, confidence: 0.87 };
+}
 
 export function useReceipts() {
- const queryClient = useQueryClient()
+ return useQuery({
+ queryKey: ["receipts"],
+ queryFn: mockFetchReceipts,
+ });
+}
 
- const receiptsQuery = useQuery({
- queryKey: ['receipts'],
- queryFn: async () => {
- await delay(300)
- return mockReceipts
+export function useScanReceipt() {
+ const queryClient = useQueryClient();
+ return useMutation({
+ mutationFn: mockScanReceipt,
+ onSuccess: () => {
+ queryClient.invalidateQueries({ queryKey: ["receipts"] });
  },
- })
-
- const addReceipt = useMutation({
- mutationFn: async (receipt: Omit<Receipt, 'id' | 'createdAt'>) => {
- await delay(500)
- const newReceipt: Receipt = {
- ...receipt,
- id: Date.now().toString(),
- createdAt: new Date().toISOString(),
- }
- mockReceipts.unshift(newReceipt)
- return newReceipt
- },
- onSuccess: () => queryClient.invalidateQueries({ queryKey: ['receipts'] }),
- })
-
- const deleteReceipt = useMutation({
- mutationFn: async (id: string) => {
- await delay(300)
- const idx = mockReceipts.findIndex(r => r.id === id)
- if (idx >= 0) mockReceipts.splice(idx, 1)
- },
- onSuccess: () => queryClient.invalidateQueries({ queryKey: ['receipts'] }),
- })
-
- return {
- receipts: receiptsQuery.data ?? [],
- isLoading: receiptsQuery.isLoading,
- addReceipt,
- deleteReceipt,
- refetch: receiptsQuery.refetch,
- }
+ });
 }

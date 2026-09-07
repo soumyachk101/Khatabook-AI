@@ -1,27 +1,38 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { QueryProvider } from "@/lib/providers/query-provider";
+import { ThemeProvider } from "@/lib/providers/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
- title: "Khatabook AI - Smart Invoice & Receipt Scanner",
- description: "AI-powered invoice and receipt scanner for Indian freelancers and small businesses",
+ title: "Khatabook AI - Smart Accounting for Indian Businesses",
+ description:
+ "AI-powered accounting and invoicing for Indian MSMEs. GST returns, UPI payments, receipt scanning, and more.",
 };
 
 export default function RootLayout({
  children,
-}: Readonly<{
+}: {
  children: React.ReactNode;
-}>) {
+}) {
  return (
- <html lang="en">
- <head>
- <link rel="preconnect" href="https://fonts.googleapis.com" />
- <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
- </head>
- <body className={inter.className}>{children}</body>
+ <html lang="en" suppressHydrationWarning>
+ <body className={inter.className}>
+ <ThemeProvider
+ attribute="class"
+ defaultTheme="system"
+ enableSystem
+ disableTransitionOnChange
+ >
+ <QueryProvider>
+ {children}
+ <Toaster />
+ </QueryProvider>
+ </ThemeProvider>
+ </body>
  </html>
  );
 }

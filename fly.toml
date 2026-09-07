@@ -1,0 +1,51 @@
+app = "khatabook-ai-backend"
+
+primary_region = "blr"
+
+[build]
+ builder = "dockerfile"
+ dockerfile = "backend/Dockerfile"
+
+[deploy]
+ release_command = "cd backend && npx prisma migrate deploy"
+ strategy = "rolling"
+
+[env]
+ NODE_ENV = "production"
+ PORT = "3004"
+
+[http_service]
+ internal_port = 3004
+ force_https = true
+ auto_stop_machines = true
+ auto_start_machines = true
+ min_machines_running = 1
+ processes = ["app"]
+
+ [[http_service.checks]]
+ grace_period = "10s"
+ interval = "30s"
+ method = "GET"
+ path = "/health"
+ protocol = "http"
+ timeout = "5s"
+
+[[services]]
+ processes = ["worker"]
+ internal_port = 3004
+
+ [[services.http_checks]]
+ grace_period = "10s"
+ interval = "30s"
+ method = "GET"
+ path = "/health"
+ protocol = "http"
+ timeout = "5s"
+
+[[vm]]
+ memory = "1gb"
+ cpu_kind = "shared"
+ cpus = 1
+
+[volumes]
+ khatabook_data = { mount_path = "/app/data", size = 1 }

@@ -1,0 +1,266 @@
+generator client {
+ provider = "prisma-client-js"
+}
+
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+ directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+ id String @id @default(uuid())
+ email String @unique
+ phone String? @unique
+ fullName String
+ avatarUrl String?
+ isOnboarded Boolean @default(false)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ userId String @unique
+
+ business Business?
+ receipts Receipt[]
+ invoices Invoice[]
+ expenses Expense[]
+ payments Payment[]
+ reminders Reminder[]
+ gstReturns GstReturn[]
+
+ @@map("profiles")
+}
+
+model Business {
+ id String @id @default(uuid())
+ name String
+ type String // sole_proprietor, pvt_ltd, llp, partnership
+ gstin String? @unique
+ pan String? @unique
+ address String?
+ city String?
+ state String?
+ pincode String?
+ financialYearStart Int // month number 1-12
+ currency String @default("INR")
+ timezone String @default("Asia/Kolkata")
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ profileId String @unique
+ profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+ categories Category[]
+ receipts Receipt[]
+ invoices Invoice[]
+ expenses Expense[]
+ payments Payment[]
+ reminders Reminder[]
+ gstReturns GstReturn[]
+
+ @@map("businesses")
+ @@index([profileId])
+ @@index([gstin])
+}
+
+model Category {
+ id String @id @default(uuid())
+ name String
+ type String // income, expense
+ parentId String?
+ color String @default("#6366f1")
+ icon String?
+ isSystem Boolean @default(false)
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ businessId String
+ business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+ expenses Expense[]
+
+ @@map("categories")
+ @@index([businessId, type])
+ @@index([businessId, name])
+}
+
+model Receipt {
+ id String @id @default(uuid())
+ imageUrl String
+ thumbnailUrl String?
+ rawText String?
+ extractedData Json?
+ isVerified Boolean @default(false)
+ confidence Float?
+ tags String[] @default([])
+ notes String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ businessId String
+ business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+ profileId String
+ profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+ categoryId String?
+ category Category? @relation(fields: [categoryId], references: [id])
+
+ @@map("receipts")
+ @@index([businessId, createdAt])
+ @@index([profileId, createdAt])
+}
+
+model Invoice {
+ id String @id @default(uuid())
+ invoiceNumber String
+ customerName String
+ customerEmail String?
+ customerPhone String?
+ billingAddress String?
+ shippingAddress String?
+ subtotal Float
+ taxRate Float @default(0)
+ taxAmount Float @default(0)
+ discount Float @default(0)
+ total Float
+ currency String @default("INR")
+ status String @default("draft") // draft, sent, viewed, paid, overdue, cancelled
+ dueDate DateTime?
+ sentAt DateTime?
+ paidAt DateTime?
+ pdfUrl String?
+ qrCodeUrl String?
+ notes String?
+ terms String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ businessId String
+ business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+ profileId String
+ profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+ lineItems Json
+ payments Payment[]
+
+ @@map("invoices")
+ @@index([businessId, status])
+ @@index([profileId, createdAt])
+ @@index([invoiceNumber])
+ @@unique([businessId, invoiceNumber])
+}
+
+model Expense {
+ id String @id @default(uuid())
+ amount Float
+ description String
+ date DateTime
+ paymentMethod String? // cash, upi, card, bank_transfer, cheque
+ referenceNumber String?
+ receiptUrl String?
+ isGstApplicable Boolean @default(false)
+ gstRate Float?
+ gstAmount Float?
+ notes String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ businessId String
+ business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+ profileId String
+ profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+ categoryId String
+ category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+ @@map("expenses")
+ @@index([businessId, date])
+ @@index([profileId, date])
+ @@index([categoryId])
+}
+
+model Payment {
+ id String @id @default(uuid())
+ amount Float
+ currency String @default("INR")
+ method String // razorpay, upi, cash, bank_transfer
+ status String @default("pending") // pending, completed, failed, refunded
+ razorpayPaymentId String? @unique
+ razorpayOrderId String?
+ razorpaySignature String?
+ receiptUrl String?
+ notes String?
+ paidAt DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ businessId String
+ business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+ profileId String
+ profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+ invoiceId String?
+ invoice Invoice? @relation(fields: [invoiceId], references: [id])
+
+ @@map("payments")
+ @@index([businessId, status])
+ @@index([razorpayPaymentId])
+ @@index([invoiceId])
+}
+
+model Reminder {
+ id String @id @default(uuid())
+ type String // payment_due, invoice_overdue, gst_deadline
+ title String
+ message String
+ channel String // email, whatsapp, sms
+ recipient String // phone number or email
+ scheduledAt DateTime
+ sentAt DateTime?
+ status String @default("pending") // pending, sent, failed, cancelled
+ errorMessage String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ businessId String
+ business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+ profileId String
+ profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+ @@map("reminders")
+ @@index([businessId, scheduledAt])
+ @@index([status])
+}
+
+model GstReturn {
+ id String @id @default(uuid())
+ returnType String // GSTR-1, GSTR-3B
+ financialYear String
+ quarter String // Q1, Q2, Q3, Q4
+ month Int? // 1-12 for monthly
+ periodStart DateTime
+ periodEnd DateTime
+ totalOutwardSupply Float @default(0)
+ totalInwardSupply Float @default(0)
+ outputTax Float @default(0)
+ inputTax Float @default(0)
+ taxPayable Float @default(0)
+ itcAvailable Float @default(0)
+ status String @default("draft") // draft, filed, pending
+ filedAt DateTime?
+ dueDate DateTime
+ jsonUrl String?
+ notes String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+
+ businessId String
+ business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+ profileId String
+ profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+ @@map("gst_returns")
+ @@index([businessId, returnType, financialYear])
+ @@unique([businessId, returnType, financialYear, quarter])
+ @@unique([businessId, returnType, financialYear, month])
+}

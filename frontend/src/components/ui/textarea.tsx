@@ -1,41 +1,21 @@
-import React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from "react";
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
- label?: string
- error?: string
-}
+import { cn } from "@/lib/utils";
 
-export function Textarea({ label, error, className, id, ...props }: TextareaProps) {
- const inputId = id || `textarea-${Math.random().toString(36).slice(2, 9)}`
-
+function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
  return (
- <div className="w-full">
- {label && (
- <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1.5">
- {label}
- {props.required && <span className="text-error-500 ml-0.5">*</span>}
- </label>
- )}
  <textarea
- id={inputId}
+ data-slot="textarea"
  className={cn(
- 'w-full min-h-[100px] px-4 py-3 rounded-input border-2 bg-white',
- 'text-gray-900 placeholder-gray-400',
- 'transition-colors duration-200 resize-vertical',
- 'focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100',
- 'disabled:bg-gray-100 disabled:text-gray-400',
- error ? 'border-error-400' : 'border-gray-200 hover:border-gray-300',
+ "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex min-h-[60px] w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none",
+ "focus-visible:ring-[3px]",
+ "disabled:cursor-not-allowed disabled:opacity-50",
+ "aria-[readonly]:bg-muted aria-[readonly]:cursor-default",
  className
  )}
  {...props}
  />
- {error && (
- <p className="mt-1.5 text-sm text-error-500 flex items-center gap-1">
- <span className="text-xs">⚠</span>
- {error}
- </p>
- )}
- </div>
- )
+ );
 }
+
+export { Textarea };

@@ -1,54 +1,34 @@
-import React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from "react";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
- variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive'
- size?: 'sm' | 'md' | 'lg' | 'icon'
- loading?: boolean
-}
+import { cn } from "@/lib/utils";
 
-const variantStyles = {
- primary: 'bg-primary-500 text-white hover:bg-primary-600 shadow-md',
- secondary: 'bg-success-500 text-white hover:bg-success-600 shadow-md',
- outline: 'border-2 border-primary-500 text-primary-500 hover:bg-primary-50',
- ghost: 'text-gray-600 hover:text-primary-500 hover:bg-gray-100',
- destructive: 'bg-error-500 text-white hover:bg-error-600 shadow-md',
-}
-
-const sizeStyles = {
- sm: 'px-3 py-1.5 text-sm h-9',
- md: 'px-5 py-2.5 text-base h-12',
- lg: 'px-8 py-3 text-lg h-14',
- icon: 'p-2 h-10 w-10',
-}
-
-export function Button({
- variant = 'primary',
- size = 'md',
- loading = false,
- className,
- children,
- disabled,
- ...props
-}: ButtonProps) {
+function Button({ className, variant = "default", size = "default", ...props }: React.ComponentProps<"button"> & { variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "upi" }) {
  return (
  <button
+ data-slot="button"
  className={cn(
- 'inline-flex items-center justify-center gap-2 rounded-input font-semibold transition-all duration-200 btn-press disabled:opacity-50 disabled:cursor-not-allowed',
- variantStyles[variant],
- sizeStyles[size],
+ "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+ {
+ "bg-primary text-primary-foreground hover:bg-primary/90": variant === "default",
+ "bg-destructive text-destructive-foreground hover:bg-destructive/90": variant === "destructive",
+ "border bg-background hover:bg-accent hover:text-accent-foreground": variant === "outline",
+ "bg-secondary text-secondary-foreground hover:bg-secondary/80": variant === "secondary",
+ "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
+ "text-primary underline-offset-4 hover:underline": variant === "link",
+ "bg-upi-green text-white hover:bg-upi-green/90": variant === "upi",
+ },
+ {
+ "h-9 px-4 py-2": size === "default",
+ "h-8 rounded-md gap-1.5 px-3": size === "sm",
+ "h-10 rounded-md px-6": size === "lg",
+ "h-11 rounded-full px-6": size === "xl",
+ "h-9 w-9": size === "icon",
+ },
  className
  )}
- disabled={disabled || loading}
  {...props}
- >
- {loading && (
- <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
- <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
- <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
- </svg>
- )}
- {children}
- </button>
- )
+ />
+ );
 }
+
+export { Button };

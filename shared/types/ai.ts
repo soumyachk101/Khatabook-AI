@@ -139,6 +139,30 @@ export interface SystemCategory {
 }
 
 export interface GSTReturn {
+ id: string;
+ userId: string;
+ businessId: string;
+ financialYear: string;
+ quarter: 'Q1' | 'Q2' | 'Q3' | 'Q4';
+ quarterStartDate: Date | string;
+ quarterEndDate: Date | string;
+ totalTaxableValue: number;
+ totalCgst: number;
+ totalSgst: number;
+ totalIgst: number;
+ inputCgst: number;
+ inputSgst: number;
+ inputIgst: number;
+ netCgst: number;
+ netSgst: number;
+ netIgst: number;
+ netLiability: number;
+ filingStatus: 'draft' | 'ready_to_file' | 'filed' | 'amended';
+ filedAt?: Date | string | null;
+ createdAt: Date | string;
+}
+
+export const DEFAULT_SYSTEM_CATEGORIES: SystemCategory[] = [
  { id: 'meals-entertainment', name: 'Meals & Entertainment', slug: 'meals-entertainment', type: 'expense', group: 'food', color: '#f97316', icon: 'utensils', gstRate: 5, keywords: ['swiggy', 'zomato', 'restaurant', 'cafe', 'food', 'meal'] },
  { id: 'travel-transport', name: 'Travel & Transport', slug: 'travel-transport', type: 'expense', group: 'travel', color: '#3b82f6', icon: 'car', gstRate: 5, keywords: ['uber', 'ola', 'rapido', 'cab', 'taxi', 'metro', 'bus', 'train', 'flight', 'parking'] },
  { id: 'internet-phone', name: 'Internet & Phone', slug: 'internet-phone', type: 'expense', group: 'utilities', color: '#10b981', icon: 'smartphone', gstRate: 18, keywords: ['broadband', 'mobile', 'data', 'recharge', 'wifi', 'jio', 'airtel', 'bsnl', 'vi'] },
@@ -161,4 +185,3 @@ export interface GSTReturn {
 ];
 
 export const CATEGORY_BY_SLUG = new Map(DEFAULT_SYSTEM_CATEGORIES.map((c) => [c.slug, c]));
-

@@ -1,159 +1,107 @@
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { cn } from '@/lib/utils'
-import {
- Home,
- Scan,
- Plus,
- FileText,
- BarChart3,
- Settings,
- ChevronLeft,
- Menu,
- X,
- Wallet,
- LogOut,
-} from 'lucide-react'
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { FileText, Receipt, FileInput, Wallet, ReceiptText, Bell, Settings, LogOut } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SheetContent, SheetTrigger, Sheet } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useUserStore } from "@/lib/store";
 
 const navItems = [
- { label: 'Dashboard', href: '/dashboard', icon: Home, activeIcon: Home },
- { label: 'Scan', href: '/receipts', icon: Scan, activeIcon: Scan },
- { label: 'Invoices', href: '/invoices', icon: FileText, activeIcon: FileText },
- { label: 'Expenses', href: '/expenses', icon: Wallet, activeIcon: Wallet },
- { label: 'GST', href: '/gst', icon: BarChart3, activeIcon: BarChart3 },
- { label: 'Settings', href: '/settings', icon: Settings, activeIcon: Settings },
-]
+ { href: "/dashboard", icon: FileText, label: "Dashboard" },
+ { href: "/receipts", icon: Receipt, label: "Receipts" },
+ { href: "/invoices", icon: FileInput, label: "Invoices" },
+ { href: "/expenses", icon: Wallet, label: "Expenses" },
+ { href: "/gst", icon: ReceiptText, label: "GST" },
+ { href: "/payments", icon: Wallet, label: "Payments" },
+ { href: "/reminders", icon: Bell, label: "Reminders" },
+ { href: "/settings", icon: Settings, label: "Settings" },
+];
 
-interface SidebarProps {
- collapsed?: boolean
- onToggle?: () => void
-}
+function SidebarNavItem({ href, icon: Icon, label }: { href: string; icon: React.ComponentType<{ className?: string }>; label: string }) {
+ const pathname = usePathname();
+ const isActive = pathname === href || pathname.startsWith(href + "/");
 
-export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
- const location = useLocation()
-
- return (
- <aside
- className={cn(
- 'fixed inset-y-0 left-0 z-40 bg-white border-r border-gray-200 transition-all duration-300',
- 'hidden lg:flex flex-col',
- collapsed ? 'w-[72px]' : 'w-[240px]'
- )}
- >
- {/* Logo */}
- <div className="flex items-center gap-3 px-5 h-16 border-b border-gray-100 shrink-0">
- {!collapsed && (
- <div className="flex items-center gap-2">
- <div className="w-8 h-8 rounded-lg gradient-success flex items-center justify-center text-white">
- <Wallet className="w-5 h-5" />
- </div>
- <span className="font-bold text-lg text-gray-900">Khatabook</span>
- </div>
- )}
- {collapsed && (
- <div className="w-8 h-8 rounded-lg gradient-success flex items-center justify-center text-white mx-auto">
- <Wallet className="w-5 h-5" />
- </div>
- )}
- </div>
-
- {/* Navigation */}
- <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto scrollbar-hide">
- {navItems.map((item) => {
- const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/')
  return (
  <Link
- key={item.href}
- to={item.href}
+ href={href}
  className={cn(
- 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
- isActive
- ? 'bg-primary-50 text-primary-500' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
- collapsed && 'justify-center px-2'
+ "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+ isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
  )}
- title={collapsed ? item.label : undefined}
  >
- <item.icon className="w-5 h-5 shrink-0" />
- {!collapsed && <span>{item.label}</span>}
+ <Icon className="size-4" />
+ {label}
  </Link>
- )
- })}
- </nav>
+ );
+}
 
- {/* Bottom section */}
- <div className="p-3 border-t border-gray-100">
- {!collapsed && (
- <div className="flex items-center gap-3 px-3 py-2">
- <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-600">
- R
+function SidebarContent() {
+ const { user, logout } = useUserStore();
+
+ return (
+ <div className="flex flex-col h-full">
+ <div className="p-4 border-b">
+ <Link href="/dashboard" className="flex items-center gap-2">
+ <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+ <FileText className="w-5 h-5 text-white" />
+ </div>
+ <span className="font-bold text-lg">Khatabook AI</span>
+ </Link>
+ </div>
+
+ <ScrollArea className="flex-1 px-3 py-4">
+ <nav className="space-y-1">
+ {navItems.map((item) => (
+ <SidebarNavItem key={item.href} {...item} />
+ ))}
+ </nav>
+ </ScrollArea>
+
+ <Separator />
+ <div className="p-3">
+ {user && (
+ <div className="flex items-center gap-3 p-2">
+ <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
+ {user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
  </div>
  <div className="flex-1 min-w-0">
- <p className="text-sm font-medium text-gray-900 truncate">Rajesh</p>
- <p className="text-xs text-gray-500 truncate">Pro Plan</p>
+ <p className="text-sm font-medium truncate">{user.name}</p>
+ <p className="text-xs text-muted-foreground truncate">{user.businessName}</p>
  </div>
- <button className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
- <LogOut className="w-4 h-4" />
- </button>
  </div>
  )}
- {collapsed && (
- <button className="w-full flex justify-center p-2 rounded-lg hover:bg-gray-100 text-gray-400">
- <LogOut className="w-5 h-5" />
- </button>
- )}
+ <Button variant="ghost" size="sm" className="w-full justify-start" onClick={logout}>
+ <LogOut className="size-4 mr-2" />
+ Sign Out
+ </Button>
  </div>
+ </div>
+ );
+}
+
+function Sidebar() {
+ return (
+ <>
+ <aside className="hidden md:flex w-64 h-screen sticky top-0 border-r bg-background">
+ <SidebarContent />
  </aside>
- )
+ <Sheet>
+ <SheetTrigger asChild>
+ <Button variant="ghost" size="icon" className="md:hidden">
+ <FileText className="size-5" />
+ </Button>
+ </SheetTrigger>
+ <SheetContent side="left" className="w-64 p-0">
+ <SidebarContent />
+ </SheetContent>
+ </Sheet>
+ </>
+ );
 }
 
-interface MobileHeaderProps {
- onMenuClick?: () => void
-}
-
-export function MobileHeader({ onMenuClick }: MobileHeaderProps) {
- return (
- <header className="sticky top-0 z-30 bg-white border-b border-gray-200 lg:hidden">
- <div className="flex items-center justify-between px-4 h-14">
- <button onClick={onMenuClick} className="p-2 -ml-2 rounded-lg hover:bg-gray-100">
- <Menu className="w-6 h-6 text-gray-600" />
- </button>
- <div className="flex items-center gap-2">
- <div className="w-7 h-7 rounded-md gradient-success flex items-center justify-center text-white">
- <Wallet className="w-4 h-4" />
- </div>
- <span className="font-bold text-base text-gray-900">Khatabook</span>
- </div>
- <div className="w-9" />
- </div>
- </header>
- )
-}
-
-interface BottomNavProps {
- activeRoute?: string
-}
-
-export function BottomNav({ activeRoute = 'dashboard' }: BottomNavProps) {
- return (
- <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 lg:hidden">
- <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
- {navItems.slice(0, 5).map((item) => {
- const isActive = activeRoute === item.label.toLowerCase() || activeRoute.startsWith(item.href)
- return (
- <Link
- key={item.href}
- to={item.href}
- className={cn(
- 'flex flex-col items-center justify-center gap-0.5 py-1 px-2 min-w-[56px]',
- isActive ? 'text-primary-500' : 'text-gray-400'
- )}
- >
- <item.icon className="w-5 h-5" />
- <span className="text-[10px] font-medium">{item.label}</span>
- </Link>
- )
- })}
- </div>
- </nav>
- )
-}
+export { Sidebar };

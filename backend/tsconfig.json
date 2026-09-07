@@ -1,9 +1,8 @@
 {
  "compilerOptions": {
  "target": "ES2022",
- "module": "NodeNext",
- "moduleResolution": "NodeNext",
- "lib": ["ES2022"],
+ "module": "CommonJS",
+ "moduleResolution": "Node",
  "outDir": "./dist",
  "rootDir": "./src",
  "strict": true,
@@ -11,14 +10,10 @@
  "skipLibCheck": true,
  "forceConsistentCasingInFileNames": true,
  "resolveJsonModule": true,
- "declaration": true,
- "declarationMap": true,
  "sourceMap": true,
- "baseUrl": ".",
- "paths": {
- "@/*": ["./src/*"]
- }
+ "declaration": true,
+ "declarationMap": true
  },
- "include": ["src/**/*", "supabase/**/*"],
+ "include": ["src/**/*", "prisma/seed.ts"],
  "exclude": ["node_modules", "dist"]
 }
